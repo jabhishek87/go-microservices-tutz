@@ -2,12 +2,14 @@ basePath: /api/v1
 host: localhost:9000
 info:
   contact: {}
-  description: This Task Service Swagger.
+  description: Everything about taks API.
   title: Swagger Task API
-  version: "1.0"
+  version: "0.1"
 paths:
   /tasks:
     get:
+      consumes:
+      - application/json
       description: get All tasks
       produces:
       - application/json
@@ -17,4 +19,66 @@ paths:
           schema:
             type: string
       summary: Get Tasks
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Add a new task
+  /tasks/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Deletes a existing task
+    get:
+      consumes:
+      - application/json
+      description: get the given task
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Find task by ID
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Update a existing task
 swagger: "2.0"

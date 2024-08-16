@@ -19,8 +19,8 @@ var (
 )
 
 // @title Swagger Task API
-// @version 1.0
-// @description This Task Service Swagger.
+// @version 0.1
+// @description Everything about taks API.
 // @host localhost:9000
 // @BasePath /api/v1
 func main() {
