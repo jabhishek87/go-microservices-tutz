@@ -15,7 +15,30 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/tasks": {
+        "/": {
+            "get": {
+                "description": "get the status of server.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "root"
+                ],
+                "summary": "Show the status of server.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks": {
             "get": {
                 "description": "get All tasks",
                 "consumes": [
@@ -24,12 +47,18 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Tasks"
+                ],
                 "summary": "Get Tasks",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Task"
+                            }
                         }
                     }
                 }
@@ -41,7 +70,21 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Tasks"
+                ],
                 "summary": "Add a new task",
+                "parameters": [
+                    {
+                        "description": "body of the request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Task"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -52,40 +95,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/tasks/{id}": {
-            "get": {
-                "description": "get the given task",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Find task by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
+        "/api/v1/tasks/{id}": {
             "put": {
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Tasks"
                 ],
                 "summary": "Update a existing task",
                 "parameters": [
@@ -110,6 +129,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Tasks"
+                ],
                 "summary": "Deletes a existing task",
                 "parameters": [
                     {
@@ -129,6 +151,78 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/tasks/{uuid}": {
+            "get": {
+                "description": "get the given task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Find task by uuid",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "uuid",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "Error Message"
+                }
+            }
+        },
+        "Task": {
+            "type": "object",
+            "required": [
+                "status",
+                "title"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "minLength": 3,
+                    "example": "todo"
+                },
+                "title": {
+                    "description": "ID     int    ` + "`" + `json:\"id\" db:\"id\"` + "`" + `",
+                    "type": "string",
+                    "minLength": 3,
+                    "example": "Title"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
         }
     }
 }`
@@ -137,7 +231,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.1",
 	Host:             "localhost:9000",
-	BasePath:         "/api/v1",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Swagger Task API",
 	Description:      "Everything about taks API.",

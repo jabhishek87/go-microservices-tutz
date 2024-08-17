@@ -1,4 +1,33 @@
-basePath: /api/v1
+basePath: /
+definitions:
+  Response:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      message:
+        example: Error Message
+        type: string
+    type: object
+  Task:
+    properties:
+      status:
+        example: todo
+        minLength: 3
+        type: string
+      title:
+        description: ID     int    `json:"id" db:"id"`
+        example: Title
+        minLength: 3
+        type: string
+      user_id:
+        example: 0
+        type: integer
+    required:
+    - status
+    - title
+    type: object
 host: localhost:9000
 info:
   contact: {}
@@ -6,7 +35,22 @@ info:
   title: Swagger Task API
   version: "0.1"
 paths:
-  /tasks:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: get the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+      summary: Show the status of server.
+      tags:
+      - root
+  /api/v1/tasks:
     get:
       consumes:
       - application/json
@@ -17,11 +61,22 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            items:
+              $ref: '#/definitions/Task'
+            type: array
       summary: Get Tasks
+      tags:
+      - Tasks
     post:
       consumes:
       - application/json
+      parameters:
+      - description: body of the request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Task'
       produces:
       - application/json
       responses:
@@ -30,7 +85,9 @@ paths:
           schema:
             type: string
       summary: Add a new task
-  /tasks/{id}:
+      tags:
+      - Tasks
+  /api/v1/tasks/{id}:
     delete:
       parameters:
       - description: id
@@ -46,24 +103,8 @@ paths:
           schema:
             type: string
       summary: Deletes a existing task
-    get:
-      consumes:
-      - application/json
-      description: get the given task
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Find task by ID
+      tags:
+      - Tasks
     put:
       consumes:
       - application/json
@@ -81,4 +122,27 @@ paths:
           schema:
             type: string
       summary: Update a existing task
+      tags:
+      - Tasks
+  /api/v1/tasks/{uuid}:
+    get:
+      consumes:
+      - application/json
+      description: get the given task
+      parameters:
+      - description: uuid
+        in: path
+        name: uuid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Find task by uuid
+      tags:
+      - Tasks
 swagger: "2.0"

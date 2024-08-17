@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"gorm.io/gorm"
 )
 
 var (
@@ -16,13 +17,15 @@ var (
 	port        = cmp.Or(getValFromEnv("SERVER_PORT"), getValfromVault("SERVER_PORT"), "9000")
 	host        = cmp.Or(getValFromEnv("SERVER_HOST"), getValfromVault("SERVER_HOST"), "0.0.0.0")
 	logFilename = cmp.Or(getValFromEnv("LOG_FILENAME"), getValfromVault("LOG_FILENAME"), "task_service.log")
+	dbFilename  = cmp.Or(getValFromEnv("DB_FILENAME"), getValfromVault("DB_FILENAME"), "test.db")
+	db          *gorm.DB
 )
 
 // @title Swagger Task API
 // @version 0.1
 // @description Everything about taks API.
 // @host localhost:9000
-// @BasePath /api/v1
+// @BasePath /
 func main() {
 	address := fmt.Sprintf("%s:%s", host, port)
 
@@ -34,6 +37,7 @@ func main() {
 	defer appLogFile.Close()
 
 	setUp(appLogFile)
+	db = setUpDB()
 
 	app.Add("GET", "/", getRoot)
 

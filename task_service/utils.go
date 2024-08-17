@@ -6,6 +6,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // fallback values in Golang
@@ -42,4 +44,24 @@ func setUp(appLogFile *os.File) {
 	// 		return nil
 	// 	},
 	// }))
+}
+
+func setUpDB() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(dbFilename), &gorm.Config{})
+
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	// Migrate the schema
+	db.AutoMigrate(&Task{})
+	// Create
+	// db.Create(&Task{
+	// 	Title:  "New Task",
+	// 	UUID:   uuid.New(),
+	// 	Status: "todo",
+	// 	UserID: 0,
+	// })
+
+	return db
 }
