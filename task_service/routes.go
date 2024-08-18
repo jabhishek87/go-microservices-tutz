@@ -12,13 +12,14 @@ import (
 
 // getRoot godoc
 //
-//	@Summary		Show the status of server.
-//	@Description	get the status of server.
-//	@Tags			root
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	response
-//	@Router			/ [get]
+// @Summary     Show the status of server.
+// @Description	get the status of server.
+// @Tags		Root
+// @Accept		json
+// @Produce		json
+// @Success		200	{object}	response
+// @Failure 500 {object} Response
+// @Router		/ [get]
 func getRoot(c echo.Context) error {
 	return c.JSON(
 		http.StatusOK,
@@ -29,30 +30,34 @@ func getRoot(c echo.Context) error {
 
 // @Summary		Get Tasks
 // @Description	get All tasks
-// @Tags			Tasks
-// @Accept			json
+// @Tags		Tasks
+// @Accept		json
 // @Produce		json
 // @Success		200	{object}	[]Task
-// @Router			/api/v1/tasks [get]
+// @Failure 500 {object} Response
+// @Router		/api/v1/tasks [get]
 func getTasks(c echo.Context) error {
 	var tasks []Task
 	db.Find(&tasks)
 	return c.JSON(http.StatusOK, tasks)
 }
 
-// @Summary		Find task by uuid
-// @Description	get the given task
-// @Tags			Tasks
-// @Accept			json
+// @Summary     Find task by uuid
+// @Description	Returns a single task
+// @Tags        Tasks
+// @Accept      json
 // @Produce		json
-// @Param			uuid	path		int	true	"uuid"
-// @Success		200		{object}	string
-// @Router			/api/v1/tasks/{uuid} [get]
+// @Param       uuid	path	string	true	"UUID of task to return"
+// @Success		200	{object}	Task
+// @Failure 400 {object} Response
+// @Failure 404 {object} Response
+// @Failure 500 {object} Response
+// @Router		/api/v1/tasks/{uuid} [get]
 func getTask(c echo.Context) error {
 	uuid := c.Param("uuid")
 	var task Task
 
-	res := db.First(&task, "uuid = ?", uuid) // find product with uuid
+	res := db.First(&task, "uuid = ?", uuid) // find task with uuid
 	if res.Error != nil {
 		return c.JSON(
 			http.StatusNotFound,
@@ -63,15 +68,15 @@ func getTask(c echo.Context) error {
 	// return c.JSON(http.StatusOK, "requested id : "+id)
 }
 
-// @Summary	Add a new task
-// @Description
-// @Tags			Tasks
-// @operationId:	"postTask"
-// @Accept			json
+// @Summary		Add a new task
+// @Description	Add a new task
+// @Tags		Tasks
+// @operationId postTask
+// @Accept		json
 // @Produce		json
-// @Param body body Task true "body of the request"
-// @Success		200	{object}	string
-// @Router			/api/v1/tasks [post]
+// @Param 		body body Task true "body of the request"
+// @Success		200	{object}	Task
+// @Router		/api/v1/tasks [post]
 func postTask(c echo.Context) error {
 	t := new(Task)
 	if err := c.Bind(t); err != nil {
@@ -90,12 +95,13 @@ func postTask(c echo.Context) error {
 
 // @Summary	Update a existing task
 // @Description
-// @Tags		Tasks
-// @Accept		json
+// @Tags	Tasks
+// @Accept	json
 // @Produce	json
-// @Param		id	path		int	true	"id"
-// @Success	200	{object}	string
-// @Router		/api/v1/tasks/{id} [put]
+// @Param	UUID	path string true "UUID"
+// @Param 	body body Task true "body of the request"
+// @Success	200	{object}	Task
+// @Router	/api/v1/tasks/{uuid} [put]
 func putTask(c echo.Context) error {
 	uuid := c.Param("uuid")
 
@@ -116,13 +122,30 @@ func putTask(c echo.Context) error {
 	return c.JSON(http.StatusAccepted, task)
 }
 
-// @Summary	Deletes a existing task
+// @Summary	 Delete task by uuid
 // @Description
-// @Tags		Tasks
+// @Tags	Tasks
+// @Accept  json
 // @Produce	json
-// @Param		id	path		int	true	"id"
-// @Success	200	{object}	string
-// @Router		/api/v1/tasks/{id} [delete]
+// @Param   uuid	path	string	true	"UUID of task to delete"
+// @Success	204	{object}	response
+// @Failure 400 {object} Response
+// @Failure 404 {object} Response
+// @Router	/api/v1/tasks/{uuid} [delete]
 func delTask(c echo.Context) error {
-	return c.NoContent(http.StatusNoContent)
+	uuid := c.Param("uuid")
+	var task Task
+
+	res := db.First(&task, "uuid = ?", uuid) // find task with uuid
+	if res.Error != nil {
+		return c.JSON(
+			http.StatusNotFound,
+			response{Code: http.StatusNotFound, Message: "record not found"},
+		)
+	}
+	db.Delete(&task, "uuid = ?", uuid) // deletge the task
+	return c.JSON(
+		http.StatusNoContent,
+		response{Code: http.StatusNoContent, Message: "record deleted"},
+	)
 }

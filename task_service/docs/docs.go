@@ -25,12 +25,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "Root"
                 ],
                 "summary": "Show the status of server.",
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/Response"
                         }
@@ -60,10 +66,17 @@ const docTemplate = `{
                                 "$ref": "#/definitions/Task"
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
                     }
                 }
             },
             "post": {
+                "description": "Add a new task",
                 "consumes": [
                     "application/json"
                 ],
@@ -89,13 +102,61 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Task"
                         }
                     }
                 }
             }
         },
-        "/api/v1/tasks/{id}": {
+        "/api/v1/tasks/{uuid}": {
+            "get": {
+                "description": "Returns a single task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Find task by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of task to return",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    }
+                }
+            },
             "put": {
                 "consumes": [
                     "application/json"
@@ -109,52 +170,32 @@ const docTemplate = `{
                 "summary": "Update a existing task",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
+                        "type": "string",
+                        "description": "UUID",
+                        "name": "UUID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "body of the request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Task"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Task"
                         }
                     }
                 }
             },
             "delete": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks"
-                ],
-                "summary": "Deletes a existing task",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tasks/{uuid}": {
-            "get": {
-                "description": "get the given task",
                 "consumes": [
                     "application/json"
                 ],
@@ -164,21 +205,33 @@ const docTemplate = `{
                 "tags": [
                     "Tasks"
                 ],
-                "summary": "Find task by uuid",
+                "summary": "Delete task by uuid",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "uuid",
+                        "type": "string",
+                        "description": "UUID of task to delete",
                         "name": "uuid",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Response"
                         }
                     }
                 }
@@ -196,7 +249,7 @@ const docTemplate = `{
                 "data": {},
                 "message": {
                     "type": "string",
-                    "example": "Error Message"
+                    "example": "Message"
                 }
             }
         },
@@ -224,7 +277,25 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "Root Description",
+            "name": "Root",
+            "externalDocs": {
+                "description": "Root documentation",
+                "url": "https://example.com"
+            }
+        },
+        {
+            "description": "Task Description",
+            "name": "Tasks",
+            "externalDocs": {
+                "description": "Task Documentation",
+                "url": "https://example.com"
+            }
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
@@ -232,7 +303,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "0.1",
 	Host:             "localhost:9000",
 	BasePath:         "/",
-	Schemes:          []string{},
+	Schemes:          []string{"http", "https"},
 	Title:            "Swagger Task API",
 	Description:      "Everything about taks API.",
 	InfoInstanceName: "swagger",

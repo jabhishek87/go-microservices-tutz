@@ -7,7 +7,7 @@ definitions:
         type: integer
       data: {}
       message:
-        example: Error Message
+        example: Message
         type: string
     type: object
   Task:
@@ -47,9 +47,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Response'
       summary: Show the status of server.
       tags:
-      - root
+      - Root
   /api/v1/tasks:
     get:
       consumes:
@@ -64,12 +68,17 @@ paths:
             items:
               $ref: '#/definitions/Task'
             type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Response'
       summary: Get Tasks
       tags:
       - Tasks
     post:
       consumes:
       - application/json
+      description: Add a new task
       parameters:
       - description: body of the request
         in: body
@@ -83,66 +92,107 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/Task'
       summary: Add a new task
       tags:
       - Tasks
-  /api/v1/tasks/{id}:
+  /api/v1/tasks/{uuid}:
     delete:
+      consumes:
+      - application/json
       parameters:
-      - description: id
+      - description: UUID of task to delete
         in: path
-        name: id
+        name: uuid
         required: true
-        type: integer
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Response'
+      summary: Delete task by uuid
+      tags:
+      - Tasks
+    get:
+      consumes:
+      - application/json
+      description: Returns a single task
+      parameters:
+      - description: UUID of task to return
+        in: path
+        name: uuid
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: Deletes a existing task
+            $ref: '#/definitions/Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Response'
+      summary: Find task by uuid
       tags:
       - Tasks
     put:
       consumes:
       - application/json
       parameters:
-      - description: id
+      - description: UUID
         in: path
-        name: id
+        name: UUID
         required: true
-        type: integer
+        type: string
+      - description: body of the request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/Task'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/Task'
       summary: Update a existing task
       tags:
       - Tasks
-  /api/v1/tasks/{uuid}:
-    get:
-      consumes:
-      - application/json
-      description: get the given task
-      parameters:
-      - description: uuid
-        in: path
-        name: uuid
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Find task by uuid
-      tags:
-      - Tasks
+schemes:
+- http
+- https
 swagger: "2.0"
+tags:
+- description: Root Description
+  externalDocs:
+    description: Root documentation
+    url: https://example.com
+  name: Root
+- description: Task Description
+  externalDocs:
+    description: Task Documentation
+    url: https://example.com
+  name: Tasks

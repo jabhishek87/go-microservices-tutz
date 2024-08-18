@@ -24,8 +24,22 @@ var (
 // @title Swagger Task API
 // @version 0.1
 // @description Everything about taks API.
+// @schemes http https
 // @host localhost:9000
 // @BasePath /
+
+// @tag.name Root
+// @tag.description Root Description
+// @tag.docs.url https://example.com
+// @tag.docs.description Root documentation
+
+// @tag.name Tasks
+// @tag.description Task Description
+// @tag.docs.url https://example.com
+// @tag.docs.description Task Documentation
+
+//
+//go:generate swag init
 func main() {
 	address := fmt.Sprintf("%s:%s", host, port)
 
@@ -45,10 +59,10 @@ func main() {
 
 	v1Group := app.Group("/api/v1")
 	v1Group.Add("GET", "/tasks", getTasks)
-	v1Group.Add("GET", "/tasks/:id", getTask)
 	v1Group.Add("POST", "/tasks", postTask)
-	v1Group.Add("PUT", "/tasks/:id", putTask)
-	v1Group.Add("DELETE", "/tasks/:id", delTask)
+	v1Group.Add("GET", "/tasks/:uuid", getTask)
+	v1Group.Add("PUT", "/tasks/:uuid", putTask)
+	v1Group.Add("DELETE", "/tasks/:uuid", delTask)
 
 	// https://echo.labstack.com/docs/cookbook/crud
 

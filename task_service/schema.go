@@ -7,7 +7,7 @@ import (
 
 type response struct {
 	Code    int         `json:"code" example:"200" `
-	Message string      `json:"message" example:"Error Message"`
+	Message string      `json:"message" example:"Message"`
 	Data    interface{} `json:"data"`
 } //@name Response
 
