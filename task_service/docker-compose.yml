@@ -1,0 +1,74 @@
+version: '3.8'
+services:
+  task_service:
+    # build: .
+    image: app:latest
+    ports:
+      - "9000:9000"
+    networks:
+      - app-net
+    # volumes:
+    #   - .:/app
+  loki:
+    image: grafana/loki:2.0.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - "./etc/loki:/mnt/config"
+    command: -config.file=/mnt/config/loki-config.yaml
+    networks:
+      - app-net
+
+  promtail:
+    image: grafana/promtail:2.0.0
+    volumes:
+      - "./etc/promtail:/mnt/config"
+      - "/var/lib/docker/containers:/var/lib/docker/containers"
+    command: -config.file=/mnt/config/promtail-config.yaml
+    networks:
+      - app-net
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./var/grafana/grafana_data:/var/lib/grafana"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=foobar
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - app-net
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    volumes:
+      - ./etc/alertmanager.yml:/etc/alertmanager/config.yml
+    ports:
+      - 9093:9093
+    networks:
+      - app-net
+
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-v0.46.0}
+  #   container_name: cadvisor
+  #   restart: unless-stopped
+  #   privileged: true
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker:/var/lib/docker:ro
+  #       # https://github.com/google/cadvisor/issues/1565#issuecomment-718812180
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     #- /dev/disk:/dev/disk:ro
+
+networks:
+  app-net:
+    driver: bridge
